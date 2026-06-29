@@ -5,6 +5,7 @@ import { parseSchedule, assertValidTimezone, isAfterHours, Schedule } from './sc
 const MAX_COOLDOWN_ENTRIES = 5000;
 
 export interface AfterHoursConfig {
+  contacts: Array<string>;
   timezone: string;
   awayMessage: string;
   cooldownSec: number;
@@ -32,6 +33,7 @@ export function parseConfig(raw: Record<string, unknown>): { config: AfterHoursC
   return {
     schedule,
     config: {
+      contacts: raw.contacts as Array<string>,
       timezone,
       awayMessage,
       cooldownSec: Number.isFinite(cooldown) ? cooldown : 3600,
@@ -58,7 +60,7 @@ export function allowReply(map: Map<string, number>, key: string, nowMs: number,
 
 export default class AfterHours implements IPlugin {
   private schedule: Schedule = {};
-  private config: AfterHoursConfig = { timezone: 'UTC', awayMessage: '', cooldownSec: 3600, respondInGroups: false };
+  private config: AfterHoursConfig = { contacts:[], timezone: 'UTC', awayMessage: '', cooldownSec: 3600, respondInGroups: false };
   private ctx: PluginContext | null = null;
   private readonly repliedAt = new Map<string, number>();
 
@@ -92,7 +94,7 @@ export default class AfterHours implements IPlugin {
     const key = `${sessionId}:${m.chatId}`;
     const cooldownMs = Math.max(0, this.config.cooldownSec) * 1000;
     if (!allowReply(this.repliedAt, key, Date.now(), cooldownMs)) return;
-
+    if(this.config.contacts && Array.isArray(this.config.contacts) && !this.config.contacts.includes(hook?.data?.contact?.name)) return;
     try {
       await this.ctx?.messages.reply(sessionId, m.chatId, m.id, this.config.awayMessage);
     } catch (err) {

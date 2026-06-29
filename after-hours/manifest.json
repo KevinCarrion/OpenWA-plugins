@@ -22,6 +22,9 @@
     "properties": {
       "schedule": { "type": "string", "required": true, "title": "Weekly schedule (JSON)",
         "description": "Object mapping mon..sun to \"HH:MM-HH:MM\" or null (closed), e.g. {\"mon\":\"09:00-17:00\",\"sat\":\"09:00-13:00\",\"sun\":null}." },
+      "contacts":{ "type":"array", "required":false,"title":"Apply Only to these contacts",
+        "description":"If empty apply to all contacts, Note: The name should match exactly",
+        "items":{"type":"string"}, "default":[]},
       "timezone": { "type": "string", "default": "UTC", "title": "IANA timezone",
         "description": "e.g. Asia/Jakarta. The schedule is interpreted in this timezone." },
       "awayMessage": { "type": "string", "required": true, "title": "After-hours reply",
@@ -33,7 +36,7 @@
   },
   "i18n": {
     "es": { "name": "Respuesta Automática Fuera de Horario", "description": "Responde automáticamente con un mensaje de ausencia configurable a los mensajes recibidos fuera del horario comercial.",
-      "config": { "schedule": { "title": "Horario semanal (JSON)" }, "timezone": { "title": "Zona horaria IANA" }, "awayMessage": { "title": "Respuesta fuera de horario" }, "cooldownSec": { "title": "Tiempo de espera (segundos por chat)" }, "respondInGroups": { "title": "Responder también en grupos" } } },
+      "config": { "schedule": { "title": "Horario semanal (JSON)" },"contacts": { "title": "Aplica solo a estos contactos" }, "timezone": { "title": "Zona horaria IANA" }, "awayMessage": { "title": "Respuesta fuera de horario" }, "cooldownSec": { "title": "Tiempo de espera (segundos por chat)" }, "respondInGroups": { "title": "Responder también en grupos" } } },
     "fr": { "name": "Réponse Automatique Hors Horaires", "description": "Répond automatiquement avec un message d'absence configurable aux messages reçus en dehors des heures d'ouverture.",
       "config": { "schedule": { "title": "Planning hebdomadaire (JSON)" }, "timezone": { "title": "Fuseau horaire IANA" }, "awayMessage": { "title": "Réponse hors horaires" }, "cooldownSec": { "title": "Délai d'attente (secondes par chat)" }, "respondInGroups": { "title": "Répondre aussi dans les groupes" } } },
     "it": { "name": "Risposta Automatica Fuori Orario", "description": "Risponde automaticamente con un messaggio di assenza configurabile ai messaggi ricevuti fuori dall'orario di lavoro.",
