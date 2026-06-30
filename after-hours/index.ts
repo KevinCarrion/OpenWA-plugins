@@ -9,6 +9,7 @@ export interface AfterHoursConfig {
   timezone: string;
   awayMessage: string;
   cooldownSec: number;
+  delayReplySec: number;
   respondInGroups: boolean;
 }
 
@@ -30,6 +31,7 @@ export function parseConfig(raw: Record<string, unknown>): { config: AfterHoursC
   assertValidTimezone(timezone);
 
   const cooldown = Number(raw.cooldownSec ?? 3600);
+  const delay = Number(raw.delayReplySec ?? 60);
   return {
     schedule,
     config: {
@@ -37,6 +39,7 @@ export function parseConfig(raw: Record<string, unknown>): { config: AfterHoursC
       timezone,
       awayMessage,
       cooldownSec: Number.isFinite(cooldown) ? cooldown : 3600,
+      delayReplySec:Number.isFinite(delay) ? delay : 60,
       respondInGroups: raw.respondInGroups === true,
     },
   };
@@ -60,7 +63,7 @@ export function allowReply(map: Map<string, number>, key: string, nowMs: number,
 
 export default class AfterHours implements IPlugin {
   private schedule: Schedule = {};
-  private config: AfterHoursConfig = { contacts:[], timezone: 'UTC', awayMessage: '', cooldownSec: 3600, respondInGroups: false };
+  private config: AfterHoursConfig = { contacts:[], timezone: 'UTC', awayMessage: '', cooldownSec: 3600,delayReplySec:60, respondInGroups: false };
   private ctx: PluginContext | null = null;
   private readonly repliedAt = new Map<string, number>();
 
@@ -96,6 +99,8 @@ export default class AfterHours implements IPlugin {
     if (!allowReply(this.repliedAt, key, Date.now(), cooldownMs)) return;
     if(this.config.contacts && Array.isArray(this.config.contacts) && !this.config.contacts.includes(hook?.data?.contact?.name)) return;
     try {
+      const delayMs = Math.max(0, this.config.delayReplySec) * 1000;
+      await new Promise(resolve => setTimeout(resolve, delayMs));
       await this.ctx?.messages.reply(sessionId, m.chatId, m.id, this.config.awayMessage);
     } catch (err) {
       this.ctx?.logger.error('after-hours: reply failed', err);
